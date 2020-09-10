@@ -10,12 +10,19 @@ use std::time;
 
 use std::sync::{Arc, Mutex};
 
+use std::collections::HashSet;
+
+type CSN = [u8; 8];
+type PACS = [u8; 5];
+
 #[derive(Debug, Default)]
 struct Stuff {
-    scanned: Vec<String>
+    scanned: HashSet<(CSN, PACS)>
 }
 
 type SharedState = Arc<Mutex<Stuff>>;
+
+use hex::FromHex;
 
 fn main() {
 
@@ -26,7 +33,35 @@ fn main() {
         thread::spawn(move|| {
             let stdin = io::stdin();
             for line in stdin.lock().lines() {
-                state.lock().unwrap().scanned.push(line.unwrap());
+                let list = &mut state.lock().unwrap().scanned;
+                let text = line.unwrap();
+
+                let strings: Vec<&str> = text.split("\t").take(2).collect();
+
+                let csn = CSN::from_hex(strings[0]);
+                let csn = match csn {
+                    Ok(v) => v,
+                    Err(e) => {
+                        println!("CSN: {}", e); 
+                        continue;
+                    },
+                };
+
+                let pacs = PACS::from_hex(strings[1]);
+                let pacs = match pacs {
+                    Ok(v) => v,
+                    Err(e) => {
+                        println!("PACS: {}", e); 
+                        continue;
+                    },
+                };
+                
+                if list.contains(&(csn, pacs)) {
+                    list.remove(&(csn, pacs));
+                }
+                else {
+                    list.insert((csn, pacs));
+                }
             }
         });
     }
