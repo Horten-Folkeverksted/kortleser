@@ -67,13 +67,14 @@ fn main() {
     }
 
     rocket::ignite()
-    .mount("/", routes![index])
+    .mount("/api", routes![current])
     .manage(state)
     .launch();
 
 }
 
-#[get("/")]
-fn index(state: State<SharedState>) -> String {
+#[get("/current")]
+fn current(state: State<SharedState>) -> String {
+    
     format!("{:?}", state.lock().unwrap().scanned)
 }
