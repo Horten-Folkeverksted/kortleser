@@ -82,8 +82,7 @@ fn main() {
 
 #[get("/current")]
 fn current(_state: State<SharedState>) -> Json<HashSet<(CSN, PACS)>> {
-    let state =  _state.clone();
-    let state = state.lock().unwrap().scanned.clone();
+    let state = _state.lock().unwrap().scanned.clone();
 
     Json(state)
 }
