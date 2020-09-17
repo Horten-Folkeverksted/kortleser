@@ -2,7 +2,9 @@
 
 #[macro_use] extern crate rocket;
 use rocket::State;
+use rocket_contrib::json::Json;
 
+use serde::{Serialize, Deserialize};
 
 use std::io::{self, BufRead};
 use std::thread;
@@ -15,7 +17,7 @@ use std::collections::HashSet;
 type CSN = [u8; 8];
 type PACS = [u8; 5];
 
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Deserialize)]
 struct Stuff {
     scanned: HashSet<(CSN, PACS)>
 }
@@ -37,6 +39,11 @@ fn main() {
                 let text = line.unwrap();
 
                 let strings: Vec<&str> = text.split("\t").take(2).collect();
+
+                if strings.len() != 2 {
+                  println!("not two tab separated elements");
+                  continue;
+                };
 
                 let csn = CSN::from_hex(strings[0]);
                 let csn = match csn {
@@ -67,14 +74,16 @@ fn main() {
     }
 
     rocket::ignite()
-    .mount("/api", routes![current])
-    .manage(state)
-    .launch();
+    	.mount("/api", routes![current])
+    	.manage(state)
+    	.launch();
 
 }
 
 #[get("/current")]
-fn current(state: State<SharedState>) -> String {
-    
-    format!("{:?}", state.lock().unwrap().scanned)
+fn current(_state: State<SharedState>) -> Json<HashSet<(CSN, PACS)>> {
+    let state =  _state.clone();
+    let state = state.lock().unwrap().scanned.clone();
+
+    Json(state)
 }
