@@ -1,11 +1,15 @@
+/*
+    🤡🤡🤡
+*/
+
 #![feature(proc_macro_hygiene, decl_macro)]
 
 use std::collections::hash_map::DefaultHasher;
 use std::hash::{Hash, Hasher};
 
 use std::io::{self, BufRead, Read, Write};
-use std::net::{TcpListener, TcpStream, Shutdown};use std::thread;
-use std::time;
+use std::net::{TcpListener, TcpStream};
+use std::thread;
 
 extern crate multiqueue;
 
@@ -43,7 +47,7 @@ fn handle_client(mut stream: TcpStream, r: multiqueue::BroadcastReceiver<u64>) {
                 val
             },
             Err(e) => {
-                println!("Error: {}", e)
+                println!("Error: {}", e);
                 continue;                                                   // If we didnt recieve anything I guess we just try again lol
             },
         };
