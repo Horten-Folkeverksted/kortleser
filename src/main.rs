@@ -1,88 +1,99 @@
 #![feature(proc_macro_hygiene, decl_macro)]
 
-#[macro_use] extern crate rocket;
-use rocket::State;
-use rocket_contrib::json::Json;
+use std::collections::hash_map::DefaultHasher;
+use std::hash::{Hash, Hasher};
 
-use serde::{Serialize, Deserialize};
-
-use std::io::{self, BufRead};
-use std::thread;
+use std::io::{self, BufRead, Read, Write};
+use std::net::{TcpListener, TcpStream, Shutdown};use std::thread;
 use std::time;
 
-use std::sync::{Arc, Mutex};
+extern crate multiqueue;
 
-use std::collections::HashSet;
+use hex::FromHex;
 
 type CSN = [u8; 8];
 type PACS = [u8; 5];
 
-#[derive(Debug, Default, Deserialize)]
-struct Stuff {
-    scanned: HashSet<(CSN, PACS)>
+
+
+fn convert(strings: Vec<&str>) -> Result<(CSN, PACS), hex::FromHexError> {
+    let csn = CSN::from_hex(strings[0]);
+    let csn = match csn {
+        Ok(v) => v,
+        Err(e) => {
+            return Err(e);
+        },
+    };
+
+    let pacs = PACS::from_hex(strings[1]);
+    let pacs = match pacs {
+        Ok(v) => v,
+        Err(e) => {
+            return Err(e)
+        },
+    };
+
+    Ok((csn, pacs))
 }
 
-type SharedState = Arc<Mutex<Stuff>>;
+fn handle_client(mut stream: TcpStream, r: multiqueue::BroadcastReceiver<u64>) {
+    loop {
+        let message = match r.try_recv() {
+            Ok(val) => {
+                val
+            },
+            Err(_) => {
+                continue;
+            },
+        };
 
-use hex::FromHex;
+        stream.write(&message.to_string()[..].as_bytes());
+        stream.write("\n".as_bytes());
+    }
+}
+
 
 fn main() {
+    let stdin = io::stdin();
+    let (s, r) = multiqueue::broadcast_queue::<u64>(10);
+    thread::spawn(move|| {
+        for line in stdin.lock().lines() {
+            let text = line.unwrap();
+    
+            let strings: Vec<&str> = text.split("\t").take(2).collect();
+    
+            if strings.len() != 2 {
+                println!("not two tab separated elements");
+                continue;
+            };
+            let data = convert(strings).unwrap();
+            
+            let mut hasher = DefaultHasher::new();
+            data.hash(&mut hasher);
+            let hash = hasher.finish();
 
-    let state = SharedState::default();
+            s.try_send(hash);
+        }
+    });
 
-    {
-        let state = state.clone();
-        thread::spawn(move|| {
-            let stdin = io::stdin();
-            for line in stdin.lock().lines() {
-                let list = &mut state.lock().unwrap().scanned;
-                let text = line.unwrap();
-
-                let strings: Vec<&str> = text.split("\t").take(2).collect();
-
-                if strings.len() != 2 {
-                  println!("not two tab separated elements");
-                  continue;
-                };
-
-                let csn = CSN::from_hex(strings[0]);
-                let csn = match csn {
-                    Ok(v) => v,
-                    Err(e) => {
-                        println!("CSN: {}", e); 
-                        continue;
-                    },
-                };
-
-                let pacs = PACS::from_hex(strings[1]);
-                let pacs = match pacs {
-                    Ok(v) => v,
-                    Err(e) => {
-                        println!("PACS: {}", e); 
-                        continue;
-                    },
-                };
-                
-                if list.contains(&(csn, pacs)) {
-                    list.remove(&(csn, pacs));
-                }
-                else {
-                    list.insert((csn, pacs));
-                }
+    let listener = TcpListener::bind("0.0.0.0:3333").unwrap();
+    // accept connections and process them, spawning a new thread for each one
+    println!("Server listening on port 3333");
+    for stream in listener.incoming() {
+        match stream {
+            Ok(stream) => {
+                println!("New connection: {}", stream.peer_addr().unwrap());
+                let r = r.add_stream();
+                thread::spawn(move|| {
+                    handle_client(stream, r)
+                });
             }
-        });
+            Err(e) => {
+                println!("Error: {}", e);
+                /* connection failed */
+            }
+        }
     }
-
-    rocket::ignite()
-    	.mount("/api", routes![current])
-    	.manage(state)
-    	.launch();
-
-}
-
-#[get("/current")]
-fn current(_state: State<SharedState>) -> Json<HashSet<(CSN, PACS)>> {
-    let state = _state.lock().unwrap().scanned.clone();
-
-    Json(state)
+    // close the socket server
+    drop(listener);
 }
