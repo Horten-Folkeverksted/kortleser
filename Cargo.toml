@@ -1,6 +1,6 @@
 [package]
-name = "cardreader"
-version = "0.1.0"
+name = "kortleser"
+version = "0.3.0"
 authors = ["Daniel Olsen <daniel.olsen99@gmail.com>"]
 edition = "2018"
 

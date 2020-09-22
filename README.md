@@ -22,7 +22,7 @@ nix-build -A rpiBuild
 
 
 ```bash
-./cardreader
+./kortleser
 ```
 ```bash
 nc localhost 3333
