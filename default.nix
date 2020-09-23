@@ -14,7 +14,7 @@ let
 
     src = ./.;
 
-    cargoSha256 = "1a69q8sjvmhiwzrs6rsizaalnxshcysqlwd4ggwqd2s2spg83g8s";
+    cargoSha256 = "0qyy6rpn332fmc4ywaaq8b3smrmw36pm4cfpfq3961m1l1vsmlpq";
   };
 in
 
@@ -32,6 +32,13 @@ in
                    else if builtins.currentSystem == "x86_64-darwin" then "x86_64-linux"
                    else builtins.currentSystem;
         };
+      })
+      ({lib, ...}: {
+        nixpkgs.overlays = [
+          (self: super: {
+            kortleser = build super;
+          })
+        ];
       })
     ];
   }).config.system.build.sdImage;

@@ -1,4 +1,4 @@
-{ lib, pkgs, config, ...}: {
+{ lib, pkgs, config, kortleser, ...}: {
 
   imports = [
     ./raspberrypi.nix
@@ -35,11 +35,17 @@
     permitRootLogin = "without-password";
   };
 
-  systemd.enableEmergencyMode = false;
-  systemd.services."serial-getty@ttyS0".enable = false;
-  systemd.services."serial-getty@hvc0".enable = false;
-  systemd.services."getty@tty1".enable = false;
-  systemd.services."autovt@".enable = false;
+  users.users.root.openssh.authorizedKeys.keys = [
+    "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCp8iMOx3eTiG5AmDh2KjKcigf7xdRKn9M7iZQ4RqP0np0UN2NUbu+VAMJmkWFyi3JpxmLuhszU0F1xY+3qM3ARduy1cs89B/bBE85xlOeYhcYVmpcgPR5xduS+TuHTBzFAgp+IU7/lgxdjcJ3PH4K0ruGRcX1xrytmk/vdY8IeSk3GVWDRrRbH6brO4cCCFjX0zJ7G6hBQueTPQoOy3jrUvgpRkzZY4ZCuljXtxbuX5X/2qWAkp8ca0iTQ5FzNA5JUyj+DWeEzjIEz6GrckOdV2LjWpT9+CtOqoPZOUudE1J9mJk4snNlMQjE06It7Kr50bpwoPqnxjo7ZjlHFLezl daniel@DanixLaptop"
+  ];
+
+  networking.firewall.allowedTCPPorts = [ 22 3333 ];
+
+  #systemd.enableEmergencyMode = false;
+  #systemd.services."serial-getty@ttyS0".enable = false;
+  #systemd.services."serial-getty@hvc0".enable = false;
+  #systemd.services."getty@tty1".enable = false;
+  #systemd.services."autovt@".enable = false;
 
   services.udisks2.enable = false;
   documentation.enable = false;
@@ -72,7 +78,7 @@
     '';
   };
 
-  boot.plymouth.enable = true;
+  boot.plymouth.enable = false;
   boot.kernelParams = [ "rd.udev.log_priority=3" "vt.global_cursor_default=0" ];
 
   networking.dhcpcd.extraConfig = ''
@@ -93,4 +99,20 @@
 
   environment.noXlibs = true;
   services.xserver.enable = false;
+ 
+#  users.users.kortleser = {
+#    isNormalUser = true;
+#    useDefaultShell = false;
+#    createHome = false;
+#
+#    shell = "${pkgs.pkgsCross.raspberryPi.kortleser}/bin/kortleser";
+#  };
+
+#  services.mingetty = {
+#    autologinUser = "kortleser";
+#  };
+   
+   environment.systemPackages = [ pkgs.kortleser ];
+
+   users.users.root.initialPassword = "1234";
 }

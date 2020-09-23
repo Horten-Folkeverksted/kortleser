@@ -14,44 +14,34 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>. 
 
-use std::sync::{Arc, Mutex};
-
 use crypto::digest::Digest;
 use crypto::sha2::Sha256;
 
-use std::io::{self, BufRead, Write};
-use std::net::{TcpListener, TcpStream};
-use std::thread;
-
-use hex::FromHex;
-
+use std::io::{self, BufRead,};
+use std::net::UdpSocket;
 
 fn main() -> std::io::Result<()> {
-    let streams = Arc::new(Mutex::new(Vec::<TcpStream>::new()));
+    let mut socket = UdpSocket::bind("127.0.0.1:0")?;
 
+    socket.connect("10.100.100.1:3333").expect("connecting to socket failed");
 
-    let listener = TcpListener::bind("0.0.0.0:3333")?;
-    let streams2 = streams.clone();
-    thread::spawn(move || {
-        for stream in listener.incoming() {
-            streams2.lock().unwrap().push(stream.unwrap());
-        }
-    
-    });
-    
     let stdin = io::stdin();
     for line in stdin.lock().lines() {
-        let line = line?;
+        let line = match line {
+          Ok(v) => v,
+          Err(e) => {
+            println!("Error getting line from stdin: {}", e);
+            continue;
+          }
+        };
 
         let mut hasher = Sha256::new();
         hasher.input_str(&line);
 
         let hash = hasher.result_str();
 
-        for mut stream in streams.lock().unwrap().iter() {
-            stream.write(hash.as_bytes())?;
-            stream.write(b"\n")?;
-        }
+        socket.send(hash.as_bytes()).expect("couldn't send");
+        socket.send(b"\n").expect("couldn't send");  
     };
     
     Ok(())
