@@ -8,7 +8,7 @@
   time.timeZone = "Europe/Oslo";
   i18n = {
     defaultLocale = "en_US";
-    supportedLocales = [ "en_US/UTF-8" ];
+    supportedLocales = [ "en_US.UTF-8/UTF-8" ];
   };
   boot.extraModprobeConfig = ''
     options cfg80211 ieee80211_regdom="EU"
@@ -29,10 +29,6 @@
 
   # input
   services.udev.packages = [ pkgs.libinput.out ];
-
-  # nix.package = pkgs.nixUnstable;
-  nix.binaryCachePublicKeys = ["nixiosk.cachix.org-1:pyzRzjCUhw0r+moXnSklZwwI/gFk+Z+A2ofmEhOf7Sc="];
-  nix.binaryCaches = ["https://nixiosk.cachix.org"];
 
   services.openssh = {
     enable = true;
@@ -93,4 +89,8 @@
     });
   '';
 
+  # kortleser
+
+  environment.noXlibs = true;
+  services.xserver.enable = false;
 }

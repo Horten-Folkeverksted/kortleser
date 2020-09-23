@@ -1,5 +1,6 @@
 let
   sources = import ./nix/sources.nix;
+  kiosknix = import sources.kiosknix { };
   rpi_pkgs = import sources.nixpkgs {
     crossSystem = {
       config = "armv6l-unknown-linux-gnueabihf";
@@ -21,7 +22,7 @@ in
   rpiBuild = build rpi_pkgs;
   nativeBuild = build pkgs;
 
-  image = {system ? null}: (import (pkgs.path + /nixos/lib/eval-config.nix) {
+  image = {system ? null}: (import (kiosknix.path + /nixos/lib/eval-config.nix) {
     modules = [
       boot/rpi-uboot.nix
       boot/configuration.nix
