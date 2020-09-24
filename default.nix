@@ -1,11 +1,12 @@
 let
   sources = import ./nix/sources.nix;
-  kiosknix = import sources.kiosknix { };
+
   rpi_pkgs = import sources.nixpkgs {
     crossSystem = {
       config = "armv6l-unknown-linux-gnueabihf";
     };
   };
+
   pkgs = import sources.nixpkgs { };
 
   build = build_pkgs: build_pkgs.rustPlatform.buildRustPackage {
@@ -14,15 +15,15 @@ let
 
     src = ./.;
 
-    cargoSha256 = "0qyy6rpn332fmc4ywaaq8b3smrmw36pm4cfpfq3961m1l1vsmlpq";
+    cargoSha256 = "1yb802n1mmhrr9sk8s5wld31h8wg4xj5g8a1lxf43yzrld32qa23";
   };
 in
 
 {
-  rpiBuild = build rpi_pkgs;
-  nativeBuild = build pkgs;
+  kortleserRpi = build rpi_pkgs;
+  kortleser = build pkgs;
 
-  image = {system ? null}: (import (kiosknix.path + /nixos/lib/eval-config.nix) {
+  image = {system ? null}: (import (pkgs.path + /nixos/lib/eval-config.nix) {
     modules = [
       boot/rpi-uboot.nix
       boot/configuration.nix

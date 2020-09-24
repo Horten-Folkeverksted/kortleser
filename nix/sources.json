@@ -1,16 +1,4 @@
 {
-    "kiosknix": {
-        "branch": "kiosk6",
-        "description": "Nix Packages collection",
-        "homepage": null,
-        "owner": "matthewbauer",
-        "repo": "nixpkgs",
-        "rev": "27961cfb2f11b5ec80f12e682448d6d653953cb1",
-        "sha256": "026wxb3wp97vvxvh9v1qb6qppj0gls57bwig2s2rzpa1f4vihcy3",
-        "type": "tarball",
-        "url": "https://github.com/matthewbauer/nixpkgs/archive/27961cfb2f11b5ec80f12e682448d6d653953cb1.tar.gz",
-        "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
-    },
     "niv": {
         "branch": "master",
         "description": "Easy dependency management for Nix projects",
@@ -24,15 +12,15 @@
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     },
     "nixpkgs": {
-        "branch": "nixos-unstable",
+        "branch": "kiosk6",
         "description": "Nix Packages collection",
         "homepage": null,
-        "owner": "NixOS",
+        "owner": "matthewbauer",
         "repo": "nixpkgs",
-        "rev": "1179840f9a88b8a548f4b11d1a03aa25a790c379",
-        "sha256": "00jy37wj04bvh299xgal2iik2my9l0nq6cw50r1b2kdfrji8d563",
+        "rev": "27961cfb2f11b5ec80f12e682448d6d653953cb1",
+        "sha256": "026wxb3wp97vvxvh9v1qb6qppj0gls57bwig2s2rzpa1f4vihcy3",
         "type": "tarball",
-        "url": "https://github.com/NixOS/nixpkgs/archive/1179840f9a88b8a548f4b11d1a03aa25a790c379.tar.gz",
+        "url": "https://github.com/matthewbauer/nixpkgs/archive/27961cfb2f11b5ec80f12e682448d6d653953cb1.tar.gz",
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     },
     "nixpkgs-mozilla": {
