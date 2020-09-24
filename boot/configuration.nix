@@ -41,11 +41,11 @@
 
   networking.firewall.allowedTCPPorts = [ 22 3333 ];
 
-  #systemd.enableEmergencyMode = false;
+  systemd.enableEmergencyMode = false;
   #systemd.services."serial-getty@ttyS0".enable = false;
   #systemd.services."serial-getty@hvc0".enable = false;
-  #systemd.services."getty@tty1".enable = false;
-  #systemd.services."autovt@".enable = false;
+  systemd.services."getty@tty1".enable = false;
+  systemd.services."autovt@".enable = false;
 
   services.udisks2.enable = false;
   documentation.enable = false;
@@ -78,7 +78,6 @@
     '';
   };
 
-  boot.plymouth.enable = false;
   boot.kernelParams = [ "rd.udev.log_priority=3" "vt.global_cursor_default=0" ];
 
   networking.dhcpcd.extraConfig = ''
@@ -100,19 +99,20 @@
   environment.noXlibs = true;
   services.xserver.enable = false;
  
-#  users.users.kortleser = {
-#    isNormalUser = true;
-#    useDefaultShell = false;
-#    createHome = false;
-#
-#    shell = "${pkgs.pkgsCross.raspberryPi.kortleser}/bin/kortleser";
-#  };
+#  environment.systemPackages = [ pkgs.kortleser ];
 
-#  services.mingetty = {
-#    autologinUser = "kortleser";
-#  };
-   
-   environment.systemPackages = [ pkgs.kortleser ];
+  systemd.services.kortleser = {
+    wantedBy = [ "multi-user.target" ]; 
+    after = [ "network.target" ];
 
-   users.users.root.initialPassword = "1234";
+    description = "Start kortleser programmet";
+
+    serviceConfig = {
+      ExecStart = ''${pkgs.kortleser}/bin/kortleser'';
+      StandardInput = "tty";
+      TTYPath = "/dev/tty1";
+    };
+  };
+
+  users.users.root.initialPassword = "1234";
 }
