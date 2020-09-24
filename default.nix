@@ -13,12 +13,23 @@ let
     pname = "kortleser";
     version = "0.3.0";
 
-    src = ./.;
+    src = ./kortleser;
 
-    cargoSha256 = "1yb802n1mmhrr9sk8s5wld31h8wg4xj5g8a1lxf43yzrld32qa23";
+    cargoSha256 = "0apj8xzchak2vn3ghqwi75y79g33r924ksb8fb1786q2zmv1dmk2";
+  };
+
+  moz_overlay = import sources.nixpkgs-mozilla;
+  moz_pkgs = import sources.nixpkgs { overlays = [ moz_overlay ]; };
+
+  rustStableChannel = moz_pkgs.latest.rustChannels.stable.rust.override {
+    extensions = [
+      "rust-src"
+      "rls-preview"
+      "clippy-preview"
+      "rustfmt-preview"
+    ];
   };
 in
-
 {
   kortleserRpi = build rpi_pkgs;
   kortleser = build pkgs;
@@ -43,4 +54,9 @@ in
       })
     ];
   }).config.system.build.sdImage;
+
+  shell_pkgs = pkgs.buildEnv {
+    name = "kortleser_environment";
+    paths = [ pkgs.niv rustStableChannel ];
+  };
 }

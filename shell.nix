@@ -1,29 +1,10 @@
 let
   sources = import ./nix/sources.nix;
-  moz_overlay = import sources.nixpkgs-mozilla;
-  nixpkgs = import sources.nixpkgs { overlays = [ moz_overlay ]; };
-  rustNightlyChannel = (nixpkgs.rustChannelOf { date = "2020-09-09"; channel = "nightly"; }).rust.override {
-    extensions = [
-			"rust-src"
-			"rls-preview"
-			"clippy-preview"
-			"rustfmt-preview"
-		];
-  };
-  rustStableChannel = nixpkgs.latest.rustChannels.stable.rust.override {
-    extensions = [
-      "rust-src"
-      "rls-preview"
-      "clippy-preview"
-      "rustfmt-preview"
-    ];
-  };
+
+  pkgs = import sources.nixpkgs { };
+  stuff = import ./default.nix;
 in
-with nixpkgs;
-stdenv.mkDerivation {
+pkgs.stdenv.mkDerivation {
   name = "moz_overlay_shell";
-  buildInputs = [
-    niv
-    rustStableChannel
-  ];
+  buildInputs = [stuff.shell_pkgs];
 }

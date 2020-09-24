@@ -108,7 +108,7 @@
     description = "Start kortleser programmet";
 
     serviceConfig = {
-      ExecStart = ''${pkgs.kortleser}/bin/kortleser'';
+      ExecStart = ''${pkgs.kortleser}/bin/kortleser --host 10.100.100.1 --port 3333'';
       StandardInput = "tty";
       TTYPath = "/dev/tty1";
     };

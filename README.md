@@ -10,14 +10,13 @@ Bruk [nix](https://nixos.org/) for å bygge pakkene.
 
 
 ```bash
-nix-build -A nativeBuild
+nix-build -A kortleser
 ```
 
 Hvis du trenger en cross compilet build for Raspberry Pi av en eller annen grunn (WARNING: Dette tar lang tid):
 
-
 ```bash
-nix-build -A rpiBuild
+nix-build -A kortleserRpi
 ```
 
 For å generere et SD-kort bilde for raspberry pi 0 (og kanskje 1):
@@ -25,9 +24,10 @@ For å generere et SD-kort bilde for raspberry pi 0 (og kanskje 1):
 nix-build -A image
 ```
 
-Dette tar mange timer (3.5h på en i7-4790K). Men kan speedes opp ved å bruke [nixiosk](https://github.com/matthewbauer/nixiosk)'s binary cache:
+Dette tar mange timer (3.5h+ på en i7-4790K). Men kan speedes opp ved å bruke [nixiosk](https://github.com/matthewbauer/nixiosk) og folikeverkstedet'ss binary cache:
 ```
 cachix use nixiosk
+cachix use folkeverkstedet
 ```
 ## Usage
 
@@ -36,7 +36,7 @@ cachix use nixiosk
 ./kortleser
 ```
 ```bash
-nc localhost 3333
+nc -lku 3333
 ```
 
 Alt som blir skrevet til stdin i `cardreader` blir hashet og sendt til netcat.
