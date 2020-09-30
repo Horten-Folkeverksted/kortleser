@@ -41,9 +41,21 @@ fn main() -> std::io::Result<()> {
             .help("UDP Port to connect to"))
         .get_matches();
 
-    let socket = UdpSocket::bind("127.0.0.1:0")?;
+    let socket = match UdpSocket::bind("0.0.0.0:0") {
+        Ok(v) => {
+            println!("Succesfully bound local socket");
+            v
+        },
+        Err(e) => {
+            panic!("Error binding local socket: {}", e)
+        }
+    };
 
-    socket.connect((matches.value_of("host").unwrap(), matches.value_of("port").unwrap_or("3333").parse::<u16>().unwrap())).expect("connecting to socket failed");
+    let host = matches.value_of("host").unwrap();
+    let port = matches.value_of("port").unwrap_or("3333").parse::<u16>().unwrap();
+
+    println!("connecting to socket {:?}", (host, port));
+    socket.connect((host, port)).expect("connecting to socket failed");
 
     let stdin = io::stdin();
     for line in stdin.lock().lines() {

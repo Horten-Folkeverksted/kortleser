@@ -103,7 +103,7 @@
 
   systemd.services.kortleser = {
     wantedBy = [ "multi-user.target" ]; 
-    after = [ "network.target" ];
+    after = [ "network-online.target" ];
 
     description = "Start kortleser programmet";
 
