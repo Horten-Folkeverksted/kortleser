@@ -79,13 +79,6 @@ fn main() -> std::io::Result<()> {
                 continue;
             },
         };
-        match socket.send(b"\n") {
-            Ok(_) => (),
-            Err(e) => {
-                println!("Couldn't send newline {}", e);
-                continue;
-            },
-        };
     };
     
     Ok(())
