@@ -1,6 +1,5 @@
 {
   nixpkgs ? ((import ./nix/sources.nix).nixpkgs),
-  moz_overlay ? ((import ./nix/sources.nix).nixpkgs-mozilla)
 }:
 
 let
@@ -19,17 +18,6 @@ let
     src = ./kortleser;
 
     cargoSha256 = "0apj8xzchak2vn3ghqwi75y79g33r924ksb8fb1786q2zmv1dmk2";
-  };
-
-  moz_pkgs = import nixpkgs { overlays = [ (import moz_overlay) ]; };
-
-  rustStableChannel = moz_pkgs.latest.rustChannels.stable.rust.override {
-    extensions = [
-      "rust-src"
-      "rls-preview"
-      "clippy-preview"
-      "rustfmt-preview"
-    ];
   };
 in
 {
@@ -56,9 +44,4 @@ in
       })
     ];
   }).config.system.build.sdImage;
-
-  shell_pkgs = pkgs.buildEnv {
-    name = "kortleser_environment";
-    paths = [ pkgs.niv rustStableChannel ];
-  };
 }
