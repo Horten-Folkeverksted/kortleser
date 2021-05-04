@@ -1,13 +1,16 @@
-let
-  sources = import ./nix/sources.nix;
+{
+  nixpkgs ? ((import ./nix/sources.nix).nixpkgs),
+  moz_overlay ? ((import ./nix/sources.nix).nixpkgs-mozilla)
+}:
 
-  rpi_pkgs = import sources.nixpkgs {
+let
+  rpi_pkgs = import nixpkgs {
     crossSystem = {
       config = "armv6l-unknown-linux-gnueabihf";
     };
   };
 
-  pkgs = import sources.nixpkgs { };
+  pkgs = import nixpkgs { };
 
   build = build_pkgs: build_pkgs.rustPlatform.buildRustPackage {
     pname = "kortleser";
@@ -18,8 +21,7 @@ let
     cargoSha256 = "0apj8xzchak2vn3ghqwi75y79g33r924ksb8fb1786q2zmv1dmk2";
   };
 
-  moz_overlay = import sources.nixpkgs-mozilla;
-  moz_pkgs = import sources.nixpkgs { overlays = [ moz_overlay ]; };
+  moz_pkgs = import nixpkgs { overlays = [ (import moz_overlay) ]; };
 
   rustStableChannel = moz_pkgs.latest.rustChannels.stable.rust.override {
     extensions = [
